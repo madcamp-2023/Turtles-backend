@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
+const { User } = require("../schemas/UserModel");
 
 // middleware that is specific to this router
 router.use(function timeLog(req, res, next) {
@@ -8,48 +9,59 @@ router.use(function timeLog(req, res, next) {
   next();
 });
 
-router.get("/", function (req, res) {
-  res.send("GET for login");
-});
-
 router.post("/", async function (req, res) {
-  const requestToken = req.body.code;
-  const clientID = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
+  try {
+    const requestToken = req.body.code;
+    const clientID = process.env.CLIENT_ID;
+    const clientSecret = process.env.CLIENT_SECRET;
 
-  await axios({
-    method: "POST",
-    url: `https://github.com/login/oauth/access_token`,
-    headers: {
-      accept: "application/json",
-    },
-    data: {
-      client_id: clientID,
-      client_secret: clientSecret,
-      code: requestToken,
-    },
-  })
-    .then((tokenResponse) => {
-      const accessToken = tokenResponse.data.access_token; // github api에서 보내주는 엑세스토큰
-      console.log(`access_token: ${accessToken}`);
-
-      // Now that we have the accessToken, make the next axios call
-      return axios.get("https://api.github.com/user", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // Use 'Bearer' and space before the token
-        },
-      });
-    })
-    .then((userInfoResponse) => {
-      const { login, id, name, html_url } = userInfoResponse.data;
-      console.log(`login: ${login}, name: ${name}`);
-      // save data
-      res.send({ login: login, name: name });
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
+    const tokenResponse = await axios({
+      method: "POST",
+      url: `https://github.com/login/oauth/access_token`,
+      headers: {
+        accept: "application/json",
+      },
+      data: {
+        client_id: clientID,
+        client_secret: clientSecret,
+        code: requestToken,
+      },
     });
+
+    const accessToken = tokenResponse.data.access_token;
+    const userInfoResponse = await axios.get("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const { login, id, name, html_url, avatar_url } = userInfoResponse.data;
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ uid: id });
+
+    // For existing user
+    if (existingUser) {
+      console.log("Existing user");
+      return res.status(200).json({ success: true, user: existingUser });
+    }
+
+    // For new user
+    const newUser = new User({
+      login,
+      uid: id,
+      name,
+      github_url: html_url,
+      profile_img: avatar_url,
+    });
+
+    const savedUser = await newUser.save();
+    console.log("New user");
+    res.status(200).json({ success: true, userInfo: savedUser });
+  } catch (error) {
+    console.error("Error in login:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
 });
 
 module.exports = router;
