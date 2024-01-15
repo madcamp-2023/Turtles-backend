@@ -3,12 +3,6 @@ const axios = require("axios");
 const router = express.Router();
 const { User } = require("../schemas/UserModel");
 
-// middleware that is specific to this router
-router.use(function timeLog(req, res, next) {
-  console.log("request on login");
-  next();
-});
-
 router.post("/", async function (req, res) {
   try {
     const requestToken = req.body.code;
@@ -43,12 +37,23 @@ router.post("/", async function (req, res) {
     // For existing user
     if (existingUser) {
       console.log("Existing user");
+      await User.updateOne(
+        { uid: id },
+        {
+          $set: {
+            github_id: login,
+            name: name,
+            github_url: html_url,
+            profile_img: avatar_url,
+          },
+        }
+      );
       return res.status(200).json({ success: true, user: existingUser });
     }
 
     // For new user
     const newUser = new User({
-      login,
+      github_id: login,
       uid: id,
       name,
       github_url: html_url,
@@ -57,7 +62,7 @@ router.post("/", async function (req, res) {
     });
 
     const savedUser = await newUser.save();
-    console.log("New user");
+    console.log(savedUser);
     res.status(200).json({ success: true, userInfo: savedUser });
   } catch (error) {
     console.error("Error in login:", error);

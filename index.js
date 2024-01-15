@@ -1,10 +1,11 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+
 const loginRouter = require("./routes/login");
 const todoRouter = require("./routes/todo");
 const alarmRouter = require("./routes/alarm");
 const friendRouter = require("./routes/friend");
+const userRouter = require("./routes/user");
+const searchRouter = require("./routes/search");
 const cors = require("cors");
 
 const app = express();
@@ -21,10 +22,12 @@ app.use("/login", loginRouter);
 app.use("/todo", todoRouter);
 app.use("/alarm", alarmRouter);
 app.use("/friend", friendRouter);
+app.use("/user", userRouter);
+app.use("/search", searchRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello, this is the index of the backend");
-});
+// app.get("/", (req, res) => {
+//   res.send("Hello, this is the index of the backend");
+// });
 
 const { mongoDB } = require("./config/database");
 mongoDB();

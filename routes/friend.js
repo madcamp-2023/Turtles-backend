@@ -2,18 +2,15 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const { Friends } = require("../schemas/FriendModel");
-
-// middleware that is specific to this router
-router.use(function timeLog(req, res, next) {
-  console.log("request on friend");
-  next();
-});
+const { User } = require("../schemas/UserModel");
 
 router.get("/", async function (req, res) {
+  // req.body: {uid: string}
   try {
-    const requestUid = req.body.uid;
+    const requestUid = req.query.uid;
+    console.log(requestUid);
 
-    // invalid uid
+    // Invalid uid
     if (!requestUid) {
       return res.status(400).json({
         success: false,
@@ -21,18 +18,24 @@ router.get("/", async function (req, res) {
       });
     }
 
-    const friendList = await Friends.findOne({ uid: requestUid });
+    let friendList = await Friends.findOne({ uid: requestUid });
 
-    // friend data not exist
-    if (!frinedList) {
+    // If friend data does not exist, create a new Friends document
+    if (!friendList) {
       const initFriend = new Friends({
         uid: requestUid,
         friends: [],
       });
-      const savedFriend = await initFriend.save();
-      return res.status(200).json({ success: true, friend: savedFriend });
+      friendList = await initFriend.save();
     }
-    res.status(200).json({ success: true, friend: friendList });
+
+    // Populate 'friends' array with 'uid' values from 'User' model
+    const populatedFriends = await Friends.populate(friendList, {
+      path: "friends",
+      select: "github_id name uid", // Include 'github_id', 'name', and 'uid' fields from 'User'
+    });
+
+    res.status(200).json({ success: true, friends: populatedFriends.friends });
   } catch (error) {
     console.error("Error in GET request for friends:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -41,25 +44,54 @@ router.get("/", async function (req, res) {
 
 router.post("/", async function (req, res) {
   try {
-    const { uid, loginOfFriend } = req.body;
+    const { uid, idOfFriend: idOfFriend } = req.body;
 
-    const friendUser = await User.findOne({ login: loginOfFriend });
+    if (!uid || !idOfFriend) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid request. Missing 'uid' or 'idOfFriend' parameter.",
+      });
+    }
 
-    if (!friendUser) {
+    const follower = await User.findOne({ uid: uid });
+    const following = await User.findOne({ github_id: idOfFriend });
+
+    if (!follower) {
       return res.status(404).json({
         success: false,
-        message: "Friend not found",
+        message: "follower not found",
+      });
+    }
+    if (!following) {
+      return res.status(404).json({
+        success: false,
+        message: "friend not found",
       });
     }
 
     // Update the Friends collection where uid matches and add uidOfFriend to the friends array
+    const existingUser = await Friends.findOne({ uid: uid });
+    console.log(existingUser);
+    if (!existingUser) {
+      console.log(`following._id: ${following._id}`);
+      const newUser = new Friends({
+        uid: uid,
+        friends: [following._id],
+      });
+      const savedUser = await newUser.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "Friend added successfully" });
+    }
+
     const result = await Friends.updateOne(
       { uid: uid },
-      { $addToSet: { friends: friendUser._id } }
+      { $addToSet: { friends: following._id } }
     );
 
     // Check the result to see if any document was modified
-    if (result.nModified === 1) {
+    console.log(result.nModified);
+    if (result.nModified !== undefined && result.nModified === 1) {
       return res
         .status(200)
         .json({ success: true, message: "Friend added successfully" });
