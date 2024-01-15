@@ -53,6 +53,7 @@ router.post("/", async function (req, res) {
       name,
       github_url: html_url,
       profile_img: avatar_url,
+      bio: "",
     });
 
     const savedUser = await newUser.save();
