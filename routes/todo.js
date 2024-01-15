@@ -9,7 +9,7 @@ router.use(function timeLog(req, res, next) {
 });
 
 router.get("/", async function (req, res) {
-  // req.body: {uid: string, date: string("YYYY-MM-DD")}
+  // req.query: {uid: string, date: string("YYYY-MM")}
   try {
     const requestUid = req.query.uid;
     const requestDate = req.query.date;
@@ -17,33 +17,22 @@ router.get("/", async function (req, res) {
     if (!requestUid || !requestDate) {
       return res.status(400).json({
         success: false,
-        error: "Invalid request. Missing 'uid' parameter.",
+        error: "Invalid request. Missing 'uid' or 'date' parameter.",
       });
     }
 
-    const existingTodos = await Todos.findOne({
+    // Calculate the start and end dates for the range
+    const startDate = new Date(requestDate);
+    const endDate = new Date(requestDate);
+    endDate.setMonth(endDate.getMonth() + 1); // Adding 1 month to get the end of the month
+
+    // Find all todos within the date range
+    const results = await Todos.find({
       uid: requestUid,
-      date: requestDate,
+      date: { $gte: startDate, $lt: endDate },
     });
 
-    if (!existingTodos) {
-      const initTodos = new Todos({
-        uid: requestUid,
-        date: requestDate,
-        todos: [],
-      });
-      const savedTodos = await initTodos.save();
-      return res.status(200).json({ success: true, todos: savedTodos });
-    }
-
-    const todos = existingTodos.todos.map((todo) => {
-      return {
-        todo_name: todo.todo_name,
-        todo_complete: todo.todo_complete,
-      };
-    });
-
-    res.status(200).json({ success: true, todos: todos });
+    res.status(200).json({ success: true, todos: results });
   } catch (error) {
     console.error("Error in GET request for todos:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
