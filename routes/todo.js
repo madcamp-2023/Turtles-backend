@@ -51,7 +51,7 @@ router.get("/", async function (req, res) {
 });
 
 router.post("/", async function (req, res) {
-  // req.body: {uid: string, date: string("YYYY-MM-DD") todos: [{todo_name: string, todo_complete: boolean}]}
+  // req.body: {uid: string, date: string("YYYY-MM-DD") todos: [{todo_name: string, todo_complete: boolean, todo_icon: string}]}
   try {
     const requestUid = req.body.uid;
     const requestDate = req.body.date;
@@ -68,6 +68,7 @@ router.post("/", async function (req, res) {
       return {
         todo_name: todo.todo_name,
         todo_complete: todo.todo_complete,
+        todo_icon: todo.todo_icon,
       };
     });
 

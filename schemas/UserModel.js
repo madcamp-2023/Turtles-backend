@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema({
   profile_img: {
     type: String,
   },
+  bio: {
+    type: String,
+  },
 });
 
 const User = mongoose.model("User", userSchema, "users");

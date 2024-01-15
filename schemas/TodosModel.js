@@ -9,6 +9,9 @@ const todoSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  todo_icon: {
+    type: String,
+  },
 });
 
 const todosSchema = new mongoose.Schema({
