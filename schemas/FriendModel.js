@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 const friendSchema = new mongoose.Schema({
   uid: {
     type: String,
+    required: true,
   },
-  freinds: [
+  friends: [
     {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   ],
