@@ -3,6 +3,11 @@ const axios = require("axios");
 const router = express.Router();
 const { User } = require("../schemas/UserModel");
 
+router.use(function timeLog(req, res, next) {
+  console.log("request on login");
+  next();
+});
+
 router.post("/", async function (req, res) {
   try {
     const requestToken = req.body.code;
@@ -34,9 +39,10 @@ router.post("/", async function (req, res) {
     // Check if the user already exists
     const existingUser = await User.findOne({ uid: id });
 
+    let userResponse;
+
     // For existing user
     if (existingUser) {
-      console.log("Existing user");
       await User.updateOne(
         { uid: id },
         {
@@ -48,22 +54,24 @@ router.post("/", async function (req, res) {
           },
         }
       );
-      return res.status(200).json({ success: true, user: existingUser });
+
+      userResponse = existingUser;
+    } else {
+      // For new user
+      const newUser = new User({
+        github_id: login,
+        uid: id,
+        name,
+        github_url: html_url,
+        profile_img: avatar_url,
+        bio: "",
+      });
+
+      const savedUser = await newUser.save();
+      console.log(savedUser);
+      userResponse = savedUser;
     }
-
-    // For new user
-    const newUser = new User({
-      github_id: login,
-      uid: id,
-      name,
-      github_url: html_url,
-      profile_img: avatar_url,
-      bio: "",
-    });
-
-    const savedUser = await newUser.save();
-    console.log(savedUser);
-    res.status(200).json({ success: true, userInfo: savedUser });
+    res.status(200).json({ success: true, userInfo: userResponse });
   } catch (error) {
     console.error("Error in login:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
