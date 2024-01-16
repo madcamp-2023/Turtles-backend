@@ -68,6 +68,12 @@ router.post("/", async function (req, res) {
         message: "friend not found",
       });
     }
+    if (follower === following) {
+      return res.status(500).json({
+        success: false,
+        message: "cannot follow oneself",
+      });
+    }
 
     // Update the Friends collection where uid matches and add uidOfFriend to the friends array
     const existingUser = await Friends.findOne({ uid: uid });

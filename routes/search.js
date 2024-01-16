@@ -3,9 +3,10 @@ const router = express.Router();
 const { User } = require("../schemas/UserModel");
 
 router.post("/", async function (req, res) {
-  // req.body: { github_id: string }
+  // req.body: { github_id: string, uid: string }
   try {
     const githubId = req.body.github_id;
+    const myUid = req.body.uid;
 
     // Check if the request contains the 'github_id' parameter
     if (!githubId) {
@@ -16,15 +17,7 @@ router.post("/", async function (req, res) {
     }
 
     // Find the user with the provided 'github_id'
-    const user = await User.find({ github_id: githubId });
-
-    // Check if the user was found
-    // if (!user) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     error: "User not found with the provided 'github_id'.",
-    //   });
-    // }
+    const user = await User.find({ github_id: githubId, uid: { $ne: myUid } });
 
     // Send the user data in the response
     res.status(200).json({ success: true, user: user });
