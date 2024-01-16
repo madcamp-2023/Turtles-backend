@@ -19,6 +19,7 @@ router.get("/", async function (req, res) {
     }
 
     let friendList = await Friends.findOne({ uid: requestUid });
+    console.log(friendList);
 
     // If friend data does not exist, create a new Friends document
     if (!friendList) {
