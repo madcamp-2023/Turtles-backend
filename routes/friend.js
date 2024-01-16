@@ -19,7 +19,6 @@ router.get("/", async function (req, res) {
     }
 
     let friendList = await Friends.findOne({ uid: requestUid });
-    console.log(friendList);
 
     // If friend data does not exist, create a new Friends document
     if (!friendList) {
@@ -72,9 +71,7 @@ router.post("/", async function (req, res) {
 
     // Update the Friends collection where uid matches and add uidOfFriend to the friends array
     const existingUser = await Friends.findOne({ uid: uid });
-    console.log(existingUser);
     if (!existingUser) {
-      console.log(`following._id: ${following._id}`);
       const newUser = new Friends({
         uid: uid,
         friends: [following._id],
