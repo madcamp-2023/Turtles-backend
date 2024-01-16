@@ -32,7 +32,7 @@ router.get("/", async function (req, res) {
     // Populate 'friends' array with 'uid' values from 'User' model
     const populatedFriends = await Friends.populate(friendList, {
       path: "friends",
-      select: "github_id name uid", // Include 'github_id', 'name', and 'uid' fields from 'User'
+      select: "github_id name uid profile_img bio", // Include 'github_id', 'name', and 'uid' fields from 'User'
     });
 
     res.status(200).json({ success: true, friends: populatedFriends.friends });
