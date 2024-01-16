@@ -46,6 +46,8 @@ router.post("/", async function (req, res) {
     const requestDate = req.body.date;
     const requestTodos = req.body.todos;
 
+    console.log(req.body);
+
     if (!requestUid || !requestDate || !requestTodos) {
       return res.status(400).json({
         success: false,
@@ -67,6 +69,7 @@ router.post("/", async function (req, res) {
     });
 
     if (!existingTodos) {
+      // handle new todo
       const initTodos = new Todos({
         uid: requestUid,
         date: requestDate,
@@ -75,9 +78,9 @@ router.post("/", async function (req, res) {
       const savedTodos = await initTodos.save();
       return res.status(200).json({ success: true, todos: savedTodos });
     }
-
+    // handle existing todo
     await Todos.updateOne(
-      { uid: requestUid },
+      { uid: requestUid, date: requestDate },
       {
         $set: { todos: todos },
       }
