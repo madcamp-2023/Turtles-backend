@@ -32,7 +32,7 @@ router.get("/", async function (req, res) {
     // Populate 'friends' array with 'uid' values from 'User' model
     const populatedFriends = await Friends.populate(friendList, {
       path: "friends",
-      select: "github_id name uid", // Include 'github_id', 'name', and 'uid' fields from 'User'
+      select: "github_id name uid profile_img bio", // Include 'github_id', 'name', and 'uid' fields from 'User'
     });
 
     res.status(200).json({ success: true, friends: populatedFriends.friends });
@@ -68,12 +68,16 @@ router.post("/", async function (req, res) {
         message: "friend not found",
       });
     }
+    if (follower === following) {
+      return res.status(500).json({
+        success: false,
+        message: "cannot follow oneself",
+      });
+    }
 
     // Update the Friends collection where uid matches and add uidOfFriend to the friends array
     const existingUser = await Friends.findOne({ uid: uid });
-    console.log(existingUser);
     if (!existingUser) {
-      console.log(`following._id: ${following._id}`);
       const newUser = new Friends({
         uid: uid,
         friends: [following._id],
