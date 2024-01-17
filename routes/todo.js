@@ -3,16 +3,19 @@ const axios = require("axios");
 const router = express.Router();
 const { Todos } = require("../schemas/TodosModel");
 
-router.use(function timeLog(req, res, next) {
-  console.log("request on todo");
-  next();
-});
+// router.use(function timeLog(req, res, next) {
+//   console.log("request on todo");
+//   next();
+// });
+
+const moment = require("moment");
 
 router.get("/", async function (req, res) {
-  // req.query: {uid: string, date: string("YYYY-MM")}
+  console.log("GET to /todo");
   try {
     const requestUid = req.query.uid;
     const requestDate = req.query.date;
+    console.log(`requestUid: ${requestUid}, requestDate: ${requestDate}`);
 
     if (!requestUid || !requestDate) {
       return res.status(400).json({
@@ -21,10 +24,19 @@ router.get("/", async function (req, res) {
       });
     }
 
-    // Calculate the start and end dates for the range
-    const startDate = new Date(requestDate);
-    const endDate = new Date(requestDate);
-    endDate.setMonth(endDate.getMonth() + 1); // Adding 1 month to get the end of the month
+    // Validate date format using moment.js
+    const isValidDate = moment(requestDate, "YYYY-MM", true).isValid();
+    if (!isValidDate) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Invalid date format. Please provide a valid 'YYYY-MM' formatted date.",
+      });
+    }
+
+    // Parse the date using moment.js
+    const startDate = moment(requestDate, "YYYY-MM").toDate();
+    const endDate = moment(requestDate, "YYYY-MM").add(1, "months").toDate();
 
     // Find all todos within the date range
     const results = await Todos.find({
@@ -41,6 +53,8 @@ router.get("/", async function (req, res) {
 
 router.post("/", async function (req, res) {
   // req.body: {uid: string, date: string("YYYY-MM-DD") todos: [{todo_name: string, todo_complete: boolean, todo_icon: string}]}
+  console.log("POST to /todo");
+
   try {
     const requestUid = req.body.uid;
     const requestDate = req.body.date;
