@@ -29,10 +29,10 @@ Madcamp Week-3 1분반
 - DB
 
   <img src="https://img.shields.io/badge/mongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
-- OS : Web
 - IDE
 
   <img src="https://img.shields.io/badge/VS code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white">
+- OS : Web
 
 ---
 
