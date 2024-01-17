@@ -52,7 +52,6 @@ Madcamp Week-3 1분반
 
 - GitHub 서버와의 통신으로 autorization_code를 받습니다.
 - autorization_code를 GitHub 서버에 보내 access_token을 받고, 이를 다시 GiHub 서버에 보내 user에 대한 정보를 받습니다. 받은 user 정보를 DB 및 브라우저에 저장합니다.
-- 웹캠이 받아오는 화면에서 얼굴 인식 마스크가 차지하는 비율을 통해 얼굴과 화면의 거리를 측정하고, 일정 거리보다고 알림을 보내줍니다.
 
 ### Main Page
 ![turtle_main](https://github.com/madcamp-2023/Turtles-backend/assets/79096116/374f704d-086a-43ae-9592-eedd363922fe)
@@ -91,7 +90,8 @@ Madcamp Week-3 1분반
 
 ### 기술 설명
 
-- 
+- 웹캠이 받아오는 화면에서 얼굴 인식 마스크가 차지하는 비율을 통해 얼굴과 화면의 거리를 측정하고, 일정 거리보다고 알림을 보내줍니다.
+
 
 
 
