@@ -24,11 +24,14 @@ Madcamp Week-3 1분반
 ### b. 개발 환경
 
 - Language
+
   React, <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white"> 
 - DB
+
   <img src="https://img.shields.io/badge/mongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
 - OS : Web
 - IDE
+
   <img src="https://img.shields.io/badge/VS code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white">
 
 ---
