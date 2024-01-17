@@ -65,4 +65,4 @@ Madcamp Week-3 1분반
 
 
 
-Frontend : https://github.com/madcamp-2023/Turtles-backend.git
+Frontend : https://github.com/madcamp-2023/Turtles-frontend
